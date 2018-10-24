@@ -21,6 +21,7 @@ class CreativeCommons_Plugin implements Typecho_Plugin_Interface
 	{
 		$info = CreativeCommons_Plugin::sqlInstall();
 		Typecho_Plugin::factory('admin/write-post.php')->option = array(__CLASS__, 'setTemplate');
+        Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('CreativeCommons_Plugin', 'render');
 		Typecho_Plugin::factory('Widget_Contents_Post_Edit')->finishPublish = array(__CLASS__, "updateTemplate");
 		Typecho_Plugin::factory('Widget_Archive')->singleHandle = array('CreativeCommons_Plugin', 'singleHandle');
 		Typecho_Plugin::factory('Widget_Archive')->select = array('CreativeCommons_Plugin', 'selectHandle');
@@ -37,7 +38,7 @@ class CreativeCommons_Plugin implements Typecho_Plugin_Interface
 		try {
 			$select = $db->select('table.contents.cc')->from('table.contents');
 			$db->query($select, Typecho_Db::READ);
-			return '检测到统计字段，插件启用成功';
+			return '检测到字段，插件启用成功';
 		} catch (Typecho_Db_Exception $e) {
 			$code = $e->getCode();
 			if(('Mysql' == $type && 1054 == $code) ||
@@ -50,16 +51,16 @@ class CreativeCommons_Plugin implements Typecho_Plugin_Interface
 					} else {
 						throw new Typecho_Plugin_Exception('不支持的数据库类型：'.$type);
 					}
-					return '建立统计字段，插件启用成功';
+					return '建立字段，插件启用成功';
 				} catch (Typecho_Db_Exception $e) {
 					$code = $e->getCode();
 					if(('Mysql' == $type && 1060 == $code) ) {
-						return '统计字段已经存在，插件启用成功';
+						return '字段已经存在，插件启用成功';
 					}
-					throw new Typecho_Plugin_Exception('统计插件启用失败。错误号：'.$code);
+					throw new Typecho_Plugin_Exception('插件启用失败。错误号：'.$code);
 				}
 			}
-			throw new Typecho_Plugin_Exception('数据表检测失败，统计插件启用失败。错误号：'.$code);
+			throw new Typecho_Plugin_Exception('数据表检测失败，插件启用失败。错误号：'.$code);
 		}
 	}
 
@@ -135,7 +136,7 @@ class CreativeCommons_Plugin implements Typecho_Plugin_Interface
 
 		$html_select = '<section class="typecho-post-option">
 	<label for="template" class="typecho-label">知识共享 Creative Commons</label>
-	<p><select id="creativecommons" name="creativecommons">
+	<p><select id="creativecommons" name="creativecommons" class="text-l w-100">
 			<option value="cc0" '.$selected[0].'>CC0 (公共领域)</option>
 			<option value="by" '.$selected[1].'>BY (署名)</option>
 			<option value="by-sa" '.$selected[2].'>BY-SA (署名-相同方式共享)</option>
@@ -155,4 +156,25 @@ class CreativeCommons_Plugin implements Typecho_Plugin_Interface
 		$sql = $db->update('table.contents')->rows(array('cc' => $CreativeCommons))->where('cid = ?', $post->cid);
 		$db->query($sql);
 	}
+
+
+    /**
+     * 插件实现方法
+     * 
+     * @access public
+     * @return void
+     */
+    public static function render($text)
+    {
+    	$content = $text;
+
+    	$content .= '<hr />';
+		$content .= '<div class="CreativeCommons">';
+        $content .=     '<blockquote>';
+        $content .= 	   '<div>本作品采用 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享-署名-相同方式分享 4.0 国际许可协议</a> 授权，转载时请注明出处</div>';
+        $content .=     '</blockquote>';
+		$content .= '</div>';
+		return $content;
+    }
+    
 }
