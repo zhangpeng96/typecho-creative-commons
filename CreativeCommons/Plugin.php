@@ -45,9 +45,9 @@ class CreativeCommons_Plugin implements Typecho_Plugin_Interface
 					('SQLite' == $type && ('HY000' == $code || 1 == $code))) {
 				try {
 					if ('Mysql' == $type) {
-						$db->query("ALTER TABLE `".$prefix."contents` ADD `cc` VARCHAR(32) NOT NULL;");
+						$db->query("ALTER TABLE `".$prefix."contents` ADD `cc` VARCHAR(16) NOT NULL DEFAULT 'cc0';");
 					} else if ('SQLite' == $type) {
-						$db->query("ALTER TABLE `".$prefix."contents` ADD `cc` VARCHAR(255) NOT NULL");
+						$db->query("ALTER TABLE `".$prefix."contents` ADD `cc` VARCHAR(16) NOT NULL DEFAULT 'cc0'");
 					} else {
 						throw new Typecho_Plugin_Exception('不支持的数据库类型：'.$type);
 					}
